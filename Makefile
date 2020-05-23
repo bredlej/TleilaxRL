@@ -1,27 +1,31 @@
 CC=gcc
-CFLAGS=-Wall -I
+CFLAGS=-Wall -I -fsyntax-only
 CLIBS=-lncurses 
 OUT=tleilax
 OBJ_DIR=obj
-OBJS=tleilax.o random.o
+OBJS=tleilax.o random.o galaxy.o ncurses_tools.o
 INCDIR=lib 
-DEPS=lib/Random/random.h
+DEPS=lib/Random/random.h lib/Galaxy/galaxy.h lib/NcursesTools/ncurses_tools.h
+CDEPS=lib/Random/random.c lib/Galaxy/galaxy.c lib/NcursesTools/ncurses_tools.c
 
 all: tleilax
 
-tleilax: $(OBJS)
-	gcc -Wall -o tleilax tleilax.o random.o galaxy.o -lncurses
+$(OUT): $(OBJS)
+	$(CC) $(CFLAGS) -o $(OUT) $(OBJS) -lncurses
 
-tleilax.o: tleilax.c lib/Random/random.h lib/Galaxy/galaxy.h
-	gcc -Wall -c tleilax.c lib/Random/random.c lib/Galaxy/galaxy.c
+tleilax.o: tleilax.c $(DEPS)
+	$(CC) $(CFLAGS) -c $(OUT).c $(CDEPS)
 
-random.o: lib/Random/random.c lib/Random/random.h
-	gcc -Wall -c random.c
+random.o: lib/Random/random.c 
+	$(CC) $(CFLAGS) -c random.c
 
 galaxy.o: lib/Galaxy/galaxy.c 
-	gcc -Wall -c galaxy.c
+	$(CC) $(CFLAGS) -c galaxy.c
+
+ncurses_tools.o: lib/NcursesTools/ncurses_tools.c 
+	$(CC) $(CFLAGS) -c ncurses_tools.c -lncurses
 
 clean:
-	rm -rf *.o tleilax lib/Random/*.gch lib/Galaxy/*.gch lib/TimeOps/*.gch
+	rm -rf *.o tleilax 
 
 

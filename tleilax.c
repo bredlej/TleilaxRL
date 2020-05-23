@@ -12,6 +12,8 @@
 #include "lib/TimeOps/timeops.h"
 #include "lib/Random/random.h"
 #include "lib/Galaxy/galaxy.h"
+#include "lib/NcursesTools/ncurses_tools.h"
+
 #define MS_PER_UPDATE_GRAPHICS 16
 #define MS_PER_UPDATE_LOGIC 1000 
 
@@ -35,21 +37,9 @@ int init()
 	return 0;
 }
 
-
-int kbhit(void)
-{
-	int ch = getch();
-	if (ch != ERR) {
-		ungetch(ch);
-		return 1;
-	} else { 
-		return 0;
-	}
-}
-
 int move_galaxy_on_input(double *galaxy_offset_x, double *galaxy_offset_y, const float speed, const float elapsed_ms)
 {
-	if (kbhit()) {
+	if (Ncurses.kbhit()) {
 		char ch = getch();
 		if (ch == 'a') {
 			*galaxy_offset_x -= speed * elapsed_ms;
@@ -68,29 +58,6 @@ int move_galaxy_on_input(double *galaxy_offset_x, double *galaxy_offset_y, const
 	return 0;
 }
 
-int init_ncurses_config() 
-{
-	initscr();
-	cbreak();
-	noecho();
-	start_color();
-	init_pair(1, COLOR_YELLOW, COLOR_BLACK);
-	init_pair(2, COLOR_BLUE, COLOR_BLACK);
-	init_pair(3, COLOR_GREEN, COLOR_BLACK);
-	curs_set(false);
-	nodelay(stdscr, TRUE);
-	scrollok(stdscr, TRUE);
-
-	return 0;
-}
-int draw_char(const int x, const int y, const char character, const int color) 
-{
-	attron(COLOR_PAIR(color));
-	mvwaddch(stdscr, y, x, character);
-	attroff(COLOR_PAIR(color));
-
-	return 0;
-}
 
 /**
  * Draw all screen components
@@ -107,11 +74,11 @@ int render_stars_on_screen(const int amount_sectors_x, const int amount_sectors_
 				randomNum = Random.rnd_int_range(0,100);
 				
 				if (randomNum < 10) {
-					draw_char(x+5, y+5, 'O', 1);
+					Ncurses.draw_char(x+5, y+5, 'O', 1);
 				} else if (randomNum >= 10 && randomNum < 50) {
-					draw_char(x+5, y+5, 'o', 2);
+					Ncurses.draw_char(x+5, y+5, 'o', 2);
 				} else {
-					draw_char(x+5, y+5, '*', 3);
+					Ncurses.draw_char(x+5, y+5, '*', 3);
 				}
 			} else {
 				mvwaddch(stdscr, y+5, x+5, ' ');
@@ -131,7 +98,7 @@ int render_stars_on_screen(const int amount_sectors_x, const int amount_sectors_
  */  
 int main(int argc, char **argv)
 {
-	init_ncurses_config();
+	Ncurses.init_config();
 
 	long previous_ms = 0, current_ms = 0, elapsed_ms = 0, lag_ms = 0, count_ms = 0;
 	

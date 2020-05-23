@@ -179,8 +179,9 @@ int main(int argc, char **argv)
 		
 		wmove(stdscr, 0 ,0);
 		sprintf(elapsed, "x=[%.02f] y=[%0.2f]", Galaxy.offset_x, Galaxy.offset_y);
-		mvaddstr(0,0, elapsed);
-		mvaddstr(40, 0, "Press CTRL+c to exit.");
+		mvaddstr(3, amount_sectors_x >> 1, elapsed);
+		mvaddstr(40, 0, "Press one of WSAD to move the screen.");
+		mvaddstr(41, 0, "Press CTRL+c to exit.");
 	}
 	/* Exit program */
 	endwin();

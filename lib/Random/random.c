@@ -34,7 +34,7 @@ int rndInt(int min, int max)
 
 unsigned int randomize_seed_xy(const int x, const int y)
 {
-	return Random.rnd(( 89 ^ x ) * ( 97 ^ y));
+	return Random.rnd(((x + y) >> 1) * (x + y + 1) +y);
 }
 
 struct random Random = {

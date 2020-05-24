@@ -9,13 +9,22 @@
 #include <errno.h>
 #include <ncurses.h>
 #include <unistd.h>
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+
 #include "lib/TimeOps/timeops.h"
 #include "lib/Random/random.h"
 #include "lib/Galaxy/galaxy.h"
 #include "lib/NcursesTools/ncurses_tools.h"
+#include "lib/Lua/lua_utils.h"
 
 #define MS_PER_UPDATE_GRAPHICS 16
 #define MS_PER_UPDATE_LOGIC 1000 
+
+struct application {
+	struct config Config; 
+} Application;
 
 /** 
  * Global variable determining if main loop should run 
@@ -106,13 +115,10 @@ int main(int argc, char **argv)
 
 	/* Stop program on CTRL+c */
 	signal(SIGINT, stop);
-	
-	int amount_sectors_x = 64;	
-	int amount_sectors_y = 32;
-	
-	char elapsed[20];
-	
-	float speed = 3.0f;
+
+	Application.Config = Lua.load_configuration("./lua/config.lua");
+
+	char debug_galaxy_xy[20];
 
 	/*
 	 * Main program loop
@@ -122,7 +128,7 @@ int main(int argc, char **argv)
 		current_ms = get_current_time();
 
 		/* Update if enough time elapsed */
-		if (count_ms > MS_PER_UPDATE_LOGIC) {
+		if (count_ms > Application.Config.ms_per_update_logic) {
 			count_ms = 0;
 		}
 		
@@ -133,20 +139,18 @@ int main(int argc, char **argv)
 		lag_ms += elapsed_ms;
 		
 		/* Update the background according to lag */
-		while (lag_ms >= MS_PER_UPDATE_GRAPHICS) 
+		while (lag_ms >= Application.Config.ms_per_update_graphics) 
 		{
-			lag_ms -= MS_PER_UPDATE_GRAPHICS;
+			lag_ms -= Application.Config.ms_per_update_graphics;
 		}
 
-		move_galaxy_on_input(&Galaxy.offset_x, &Galaxy.offset_y, speed, elapsed_ms);
-		
+		move_galaxy_on_input(&Galaxy.offset_x, &Galaxy.offset_y, Application.Config.scroll_speed, elapsed_ms);
 		refresh();
-		
-		render_stars_on_screen(amount_sectors_x, amount_sectors_y); 
+		render_stars_on_screen(Application.Config.screen_width, Application.Config.screen_height); 
 		
 		wmove(stdscr, 0 ,0);
-		sprintf(elapsed, "x=[%.02f] y=[%0.2f]", Galaxy.offset_x, Galaxy.offset_y);
-		mvaddstr(3, amount_sectors_x >> 1, elapsed);
+		sprintf(debug_galaxy_xy, "x=[%.02f] y=[%0.2f]", Galaxy.offset_x, Galaxy.offset_y);
+		mvaddstr(3, Application.Config.screen_width >> 1, debug_galaxy_xy);
 		mvaddstr(40, 0, "Press one of WSAD to move the screen.");
 		mvaddstr(41, 0, "Press CTRL+c to exit.");
 	}

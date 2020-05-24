@@ -10,8 +10,15 @@ struct config {
 };
 
 struct lua {
+	/* -- public  -- */
 	struct config (*load_configuration) (const char*);
+	int (*randomize_seed) (const char *, const int x, const int y);
+
+	/* -- private -- */
+	/* pointer to a randomize_seed(x,y) function used by Lua scripts */
+	int (*p_randomize_seed_xy_function) (const int, const int);
 };
 
+/* Export as a "namespaced" global variable */
 extern struct lua Lua;
 #endif

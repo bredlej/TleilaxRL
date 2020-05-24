@@ -97,6 +97,11 @@ int render_stars_on_screen(const int amount_sectors_x, const int amount_sectors_
 	return 0;
 }
 
+int test_function(int x, int y) 
+{
+	return x + y + 40;
+}
+
 /**
  * Main program
  * 
@@ -107,6 +112,12 @@ int render_stars_on_screen(const int amount_sectors_x, const int amount_sectors_
  */  
 int main(int argc, char **argv)
 {
+	Application.Config = Lua.load_configuration("./lua/config.lua");
+
+	/* Set which randomize seed function Lua should use. */
+	Lua.p_randomize_seed_xy_function = Random.randomize_seed_xy;
+	int lua_output = Lua.randomize_seed("./lua/galaxy.lua", 1, 10);
+	
 	Ncurses.init_config();
 
 	long previous_ms = 0, current_ms = 0, elapsed_ms = 0, lag_ms = 0, count_ms = 0;
@@ -116,10 +127,11 @@ int main(int argc, char **argv)
 	/* Stop program on CTRL+c */
 	signal(SIGINT, stop);
 
-	Application.Config = Lua.load_configuration("./lua/config.lua");
 
-	char debug_galaxy_xy[20];
+	char debug_galaxy_xy[100];
 
+	//Lua.p_randomize_seed_xy_function = test_function;
+	
 	/*
 	 * Main program loop
 	 */
@@ -149,7 +161,7 @@ int main(int argc, char **argv)
 		render_stars_on_screen(Application.Config.screen_width, Application.Config.screen_height); 
 		
 		wmove(stdscr, 0 ,0);
-		sprintf(debug_galaxy_xy, "x=[%.02f] y=[%0.2f]", Galaxy.offset_x, Galaxy.offset_y);
+		sprintf(debug_galaxy_xy, "x=[%.02f] y=[%0.2f], Lua=[%d]", Galaxy.offset_x, Galaxy.offset_y, lua_output);
 		mvaddstr(3, Application.Config.screen_width >> 1, debug_galaxy_xy);
 		mvaddstr(40, 0, "Press one of WSAD to move the screen.");
 		mvaddstr(41, 0, "Press CTRL+c to exit.");

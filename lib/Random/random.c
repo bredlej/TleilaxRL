@@ -43,3 +43,4 @@ struct random Random = {
 	.rnd_int_range = rndInt,
 	.randomize_seed_xy = randomize_seed_xy
 };
+

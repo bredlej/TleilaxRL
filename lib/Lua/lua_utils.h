@@ -17,6 +17,8 @@ struct lua {
 	/* -- private -- */
 	/* pointer to a randomize_seed(x,y) function used by Lua scripts */
 	int (*p_randomize_seed_xy_function) (const int, const int);
+	int (*p_rnd_int_range_function) (const int, const int);
+	int (*p_rnd_double_range_function) (const double, const double);
 };
 
 /* Export as a "namespaced" global variable */

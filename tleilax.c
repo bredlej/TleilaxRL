@@ -34,8 +34,19 @@ static volatile sig_atomic_t program_is_running = 1;
 /** 
  * Stops the program from running 
  */
-static void stop (int sig) {
+static void stop (int sig) 
+{
 	program_is_running = 0;
+}
+
+int init_lua_bindings()
+{
+	/* Set which randomize seed function Lua should use. */
+	Lua.p_randomize_seed_xy_function = Random.randomize_seed_xy;
+	Lua.p_rnd_int_range_function = Random.rnd_int_range;
+	Lua.p_rnd_double_range_function = Random.rnd_double_range;
+
+	return 0;	
 }
 
 /**
@@ -43,6 +54,7 @@ static void stop (int sig) {
  */
 int init() 
 {
+	init_lua_bindings();
 	return 0;
 }
 
@@ -97,11 +109,6 @@ int render_stars_on_screen(const int amount_sectors_x, const int amount_sectors_
 	return 0;
 }
 
-int test_function(int x, int y) 
-{
-	return x + y + 40;
-}
-
 /**
  * Main program
  * 
@@ -112,10 +119,9 @@ int test_function(int x, int y)
  */  
 int main(int argc, char **argv)
 {
+	init();
 	Application.Config = Lua.load_configuration("./lua/config.lua");
 
-	/* Set which randomize seed function Lua should use. */
-	Lua.p_randomize_seed_xy_function = Random.randomize_seed_xy;
 	int lua_output = Lua.randomize_seed("./lua/galaxy.lua", 1, 10);
 	
 	Ncurses.init_config();

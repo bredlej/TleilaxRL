@@ -14,6 +14,7 @@
 #define LUA_FUNC_RANDOM_DOUBLE "random_double"
 #define LUA_FUNC_GALAXY_SET_OFFSET "galaxy_set_offset"
 #define LUA_FUNC_GALAXY_DRAW_CHAR "galaxy_draw_char"
+#define LUA_FUNC_DRAW_GALAXY "draw_galaxy"
 
 /** 
  * Load configuration in script given by the filename and return as config struct 
@@ -87,7 +88,7 @@ static int lua_stackprepare_galaxy_draw_char(lua_State *L)
 	int x = (int) luaL_checknumber(L, 2);
 	int y = (int) luaL_checknumber(L, 3);
 	int color = (int) luaL_checknumber(L, 4);
-//	luaL_nil(L);
+	
 	Lua.p_draw_char_function(x, y, c, color);
 
 	return 0;
@@ -145,7 +146,7 @@ int lua_randomize_seed(const char * filename, int x, int y)
 void lua_draw_galaxy(lua_State *L, const int x, const int y)
 {
 	/* Find function to call inside Lua script */
-	lua_getglobal(L, LUA_FUNC_GALAXY_DRAW_CHAR);
+/*	lua_getglobal(L, LUA_FUNC_GALAXY_DRAW_CHAR);
 
 	if (lua_isfunction(L, -1)){
 		lua_pushstring(L, "X");
@@ -153,6 +154,16 @@ void lua_draw_galaxy(lua_State *L, const int x, const int y)
 		lua_pushnumber(L, y);
 		lua_pushnumber(L, 1);
 		if (lua_pcall(L, 4, 0, 0)) error (L, "Error %s\n", lua_tostring(L, -1));
+	}
+	else {
+		error (L, "Error: %s\n", lua_tostring(L, -1));
+	}
+*/
+	lua_getglobal(L, LUA_FUNC_DRAW_GALAXY);
+	if (lua_isfunction(L, -1)) {
+		lua_pushnumber(L, x);
+		lua_pushnumber(L, y);
+		if (lua_pcall(L, 2, 0, 0)) error (L, "Error %s\n", lua_tostring(L, -1));
 	}
 	else {
 		error (L, "Error: %s\n", lua_tostring(L, -1));

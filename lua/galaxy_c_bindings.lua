@@ -15,17 +15,17 @@ galaxy = {
 rnd = {}
 
 function randomize_seed(x, y)
-	print(string.format("Lua called randomize_seed(%d, %d)", x, y))
+--	print(string.format("Lua called randomize_seed(%d, %d)", x, y))
 	return HOST_randomize_seed_xy(x, y) 
 end
 
 function random_int(x, y)
-	print(string.format("Lua called random_int(%d, %d)", x, y))
+--	print(string.format("Lua called random_int(%d, %d)", x, y))
 	return HOST_random_int(x, y)
 end
 
 function random_double(x, y)
-	print(string.format("Lua called random_double(%d, %d)", x, y))
+--	print(string.format("Lua called random_double(%d, %d)", x, y))
 	return HOST_random_double(x, y)
 end
 

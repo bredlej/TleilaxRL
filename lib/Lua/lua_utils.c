@@ -7,10 +7,13 @@
 #define FUNC_NAME_RANDOMIZE_SEED_XY "HOST_randomize_seed_xy"
 #define FUNC_NAME_RANDOM_INT "HOST_random_int"
 #define FUNC_NAME_RANDOM_DOUBLE "HOST_random_double"
+#define FUNC_NAME_DRAW_CHAR "HOST_draw_char"
 
 #define LUA_FUNC_RANDOMIZE_SEED "randomize_seed"
 #define LUA_FUNC_RANDOM_INT "random_int"
 #define LUA_FUNC_RANDOM_DOUBLE "random_double"
+#define LUA_FUNC_GALAXY_SET_OFFSET "galaxy_set_offset"
+#define LUA_FUNC_GALAXY_DRAW_CHAR "galaxy_draw_char"
 
 /** 
  * Load configuration in script given by the filename and return as config struct 
@@ -78,21 +81,40 @@ static int lua_stackprepare_rnd_double_range(lua_State *L)
 	return 1;
 }
 
+static int lua_stackprepare_galaxy_draw_char(lua_State *L)
+{
+	const char *c = (const char *) luaL_checkstring(L, 1);
+	int x = (int) luaL_checknumber(L, 2);
+	int y = (int) luaL_checknumber(L, 3);
+	int color = (int) luaL_checknumber(L, 4);
+//	luaL_nil(L);
+	Lua.p_draw_char_function(x, y, c, color);
+
+	return 0;
+}
+
+lua_State *lua_load_galaxy_script(const char *filename) {
+	lua_State *L = luaL_newstate();
+	luaL_openlibs(L);
+	lua_register(L, FUNC_NAME_RANDOMIZE_SEED_XY, lua_stackprepare_randomize_seed_xy);
+	lua_register(L, FUNC_NAME_RANDOM_INT, lua_stackprepare_rnd_int_range);
+	lua_register(L, FUNC_NAME_DRAW_CHAR, lua_stackprepare_galaxy_draw_char);
+	
+	if (luaL_loadfile(L, filename)|| lua_pcall(L, 0, 0, 0)) error (L, "Error loading file. :%s", lua_tostring(L, -1));
+	return L;
+}
+
+int close_galaxy_script(lua_State *lua_state_handler) {
+	lua_close(lua_state_handler);
+	return 0;
+}
+
 /**
  *	Runs the randomize_seed(x,y) function inside Lua script with given filename and parameters
  */
 int lua_randomize_seed(const char * filename, int x, int y)
 {
-	/* Open Lua handler and load libraries */
-	lua_State *L = luaL_newstate();
-	luaL_openlibs(L);
-
-	/* Bind Lua global name to C function */
-	lua_register(L, FUNC_NAME_RANDOMIZE_SEED_XY, lua_stackprepare_randomize_seed_xy);
-
-	/* Load script with given file name */
-	if (luaL_loadfile(L, filename)|| lua_pcall(L, 0, 0, 0)) error (L, "Error loading file. :%s", lua_tostring(L, -1));
-
+	lua_State *L = lua_load_galaxy_script(filename);
 	/* Find function to call inside Lua script */
 	lua_getglobal(L, LUA_FUNC_RANDOMIZE_SEED);
 	
@@ -120,48 +142,27 @@ int lua_randomize_seed(const char * filename, int x, int y)
 	return result;
 }	
 
-int lua_draw_galaxy(const char * filename, const int x, const int y)
+void lua_draw_galaxy(lua_State *L, const int x, const int y)
 {
-	/* Open Lua handler and load libraries */
-	lua_State *L = luaL_newstate();
-	luaL_openlibs(L);
-
-	/* Bind Lua global name to C function */
-	lua_register(L, FUNC_NAME_RANDOM_INT, lua_stackprepare_rnd_int_range);
-
-	/* Load script with given file name */
-	if (luaL_loadfile(L, filename)|| lua_pcall(L, 0, 0, 0)) error (L, "Error loading file. :%s", lua_tostring(L, -1));
-
 	/* Find function to call inside Lua script */
-	lua_getglobal(L, LUA_FUNC_RANDOM_INT);
-	
-	/* If there's a function on the stack, push attributes and call it */
+	lua_getglobal(L, LUA_FUNC_GALAXY_DRAW_CHAR);
+
 	if (lua_isfunction(L, -1)){
+		lua_pushstring(L, "X");
 		lua_pushnumber(L, x);
 		lua_pushnumber(L, y);
-
-		/* Takes 2 parameters and gives 1 result */
-		if (lua_pcall(L, 2, 1, 0)) error (L, "Error %s\n", lua_tostring(L, -1));
+		lua_pushnumber(L, 1);
+		if (lua_pcall(L, 4, 0, 0)) error (L, "Error %s\n", lua_tostring(L, -1));
 	}
 	else {
 		error (L, "Error: %s\n", lua_tostring(L, -1));
 	}
-
-	/* If result is not a number something went wrong */	
-	if (!lua_isnumber(L, -1)) error (L, "Got wrong result type from %s call.\n", LUA_FUNC_RANDOMIZE_SEED);
-
-	/* Get result from Lua function call */
-	int result = (int) lua_tonumber(L, -1);
-	
-	/* Close handler and return result to caller*/
-	lua_close(L);
-
-	return result;
 
 }
 
 /* Export prepared functions inside "namespaced" global variable */
 struct lua Lua = {
 	.load_configuration = lua_load_configuration,
-	.randomize_seed = lua_draw_galaxy	
+	.randomize_seed = lua_randomize_seed,
+	.draw_galaxy = lua_draw_galaxy
 };

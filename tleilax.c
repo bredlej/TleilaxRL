@@ -45,7 +45,7 @@ int init_lua_bindings()
 	Lua.p_randomize_seed_xy_function = Random.randomize_seed_xy;
 	Lua.p_rnd_int_range_function = Random.rnd_int_range;
 	Lua.p_rnd_double_range_function = Random.rnd_double_range;
-
+	Lua.p_draw_char_function = Ncurses.draw_char;
 	return 0;	
 }
 
@@ -95,14 +95,14 @@ int render_stars_on_screen(const int amount_sectors_x, const int amount_sectors_
 				randomNum = Random.rnd_int_range(0,100);
 				
 				if (randomNum < 10) {
-					Ncurses.draw_char(x+5, y+5, 'O', 1);
+					Ncurses.draw_char(x+5, y+5, "O", 1);
 				} else if (randomNum >= 10 && randomNum < 50) {
-					Ncurses.draw_char(x+5, y+5, 'o', 2);
+					Ncurses.draw_char(x+5, y+5, "o", 2);
 				} else {
-					Ncurses.draw_char(x+5, y+5, '*', 3);
+					Ncurses.draw_char(x+5, y+5, "*", 3);
 				}
 			} else {
-				mvwaddch(stdscr, y+5, x+5, ' ');
+				mvaddstr(y+5, x+5, " ");
 			}
 		}
 	}
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 	char debug_galaxy_xy[100];
 
 	//Lua.p_randomize_seed_xy_function = test_function;
-	
+	lua_State *L = lua_load_galaxy_script("lua/galaxy.lua");
 	/*
 	 * Main program loop
 	 */
@@ -164,8 +164,8 @@ int main(int argc, char **argv)
 
 		move_galaxy_on_input(&Galaxy.offset_x, &Galaxy.offset_y, Application.Config.scroll_speed, elapsed_ms);
 		refresh();
-		render_stars_on_screen(Application.Config.screen_width, Application.Config.screen_height); 
-		
+		//render_stars_on_screen(Application.Config.screen_width, Application.Config.screen_height); 
+		Lua.draw_galaxy(L, 10, 10);	
 		wmove(stdscr, 0 ,0);
 		sprintf(debug_galaxy_xy, "x=[%.02f] y=[%0.2f], Lua=[%d]", Galaxy.offset_x, Galaxy.offset_y, lua_output);
 		mvaddstr(3, Application.Config.screen_width >> 1, debug_galaxy_xy);
@@ -174,7 +174,7 @@ int main(int argc, char **argv)
 	}
 	/* Exit program */
 	endwin();
-	
+	close_galaxy_script(L);	
 	/* Exit */	
 	return 0;
 }

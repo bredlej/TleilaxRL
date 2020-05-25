@@ -17,10 +17,10 @@ int init_ncurses_config()
 	return 0;
 }
 
-int draw_char(const int x, const int y, const char character, const int color) 
+int draw_char(const int x, const int y, const char *character, const int color) 
 {
 	attron(COLOR_PAIR(color));
-	mvwaddch(stdscr, y, x, character);
+	mvaddstr(y, x, character);
 	attroff(COLOR_PAIR(color));
 
 	return 0;

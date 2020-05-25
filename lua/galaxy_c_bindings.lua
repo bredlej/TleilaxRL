@@ -8,7 +8,10 @@
 --
 
 --- 
-galaxy = {}
+galaxy = {
+	["offset_x"] = 0, 
+	["offset_y"] = 0
+}
 rnd = {}
 
 function randomize_seed(x, y)
@@ -26,11 +29,11 @@ function random_double(x, y)
 	return HOST_random_double(x, y)
 end
 
---function galaxy.set_offset(x, y)
---	galaxy["offset_x"] = x
---	galaxy["offset_y"] = y
---end
+function galaxy_set_offset(x, y)
+	galaxy["offset_x"] = x
+	galaxy["offset_y"] = y
+end
 
---function galaxy.draw_char(char, x, y, color)
---	HOST_draw_char(char, x, y, color)
---end
+function galaxy_draw_char(char, x, y, color)
+	HOST_draw_char(char, x, y, color)
+end

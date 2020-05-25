@@ -22,7 +22,7 @@ struct lua {
 	unsigned int (*p_randomize_seed_xy_function) (const int, const int);
 	int (*p_rnd_int_range_function) (const int, const int);
 	int (*p_rnd_double_range_function) (const double, const double);
-	int (*p_draw_char_function) (const int, const int, const char *, const int);
+	void (*p_draw_char_function) (const char, const int, const int, const int);
 };
 
 lua_State *lua_load_galaxy_script(const char *);

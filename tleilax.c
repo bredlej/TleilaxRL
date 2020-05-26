@@ -118,7 +118,6 @@ int main(int argc, char **argv)
 		handle_user_input(L, elapsed_ms);
 
 		refresh();
-		
 		Lua.render_state(L);	
 	}
 	/* Exit program */

@@ -5,8 +5,8 @@ require 'lua/star'
 local entities = {
 	[0] = {
 		["position"] = {
-			["x"] = 32,
-			["y"] = 32
+			["x"] = screen_width / 2,
+			["y"] = screen_height / 2
 		}
 	}
 }
@@ -35,7 +35,7 @@ function draw_galaxy()
 
 	player_pos = entities[0]["position"]
 	-- draw_string(string.format("galaxy(x=[%.02f], y=[%0.2f]) player(x=[%d], y=[%d])", galaxy["offset_x"], galaxy["offset_y"], player_pos["x"], player_pos["y"]), 0 ,3 ,0)
-	player_at_star = 0
+	player_at_star = nil
 	for x = 0, screen_width, 1
 		do
 		for y = 0, screen_height, 1
@@ -44,13 +44,13 @@ function draw_galaxy()
 				star:init(x + math.floor(galaxy["offset_x"]), y + math.floor(galaxy["offset_y"]))
 				if (star.exists)
 				then
-					draw_string(star.type, x+5, y+5, star.type)
+					draw_string(type_to_char[star.type], x+5, y+5, star.type)					
 				else
 					draw_string(" ", x+5, y+5, 1);
 				end
 				if (star.exists and x + math.floor(galaxy["offset_x"]) == player_pos["x"] and y + math.floor(galaxy["offset_y"]) == player_pos["y"])
 						then
-							player_at_star = star.type
+							player_at_star = star
 						end
 				if (x + math.floor(galaxy["offset_x"]) == player_pos["x"] and y + math.floor(galaxy["offset_y"]) == player_pos["y"])
 					then
@@ -58,12 +58,25 @@ function draw_galaxy()
 					end
 		end
 	end	
-	if (player_at_star > 0)
+	if (player_at_star)
 		then
-			draw_string(string.format("Encountered Star=[%d]", player_at_star), screen_width + 6, 5, 0)
+			draw_string(string.format("Encountered Star!"), screen_width + 6, 5, 0)
+			i = 0
+			for planet_idx = 0, player_at_star.amount_planets, 1
+				do
+					planets = player_at_star.planets
+					draw_string(string.format("Planets"), screen_width + 6, 7 , 0)
+					draw_string(string.format(" O "), screen_width + 15 +(i*3), 7 , planets[i]["type"])
+					i = i + 1
+				end
 		else
+			for i = 0, 10, 1
+				do
+					draw_string(string.format("                                          "), screen_width + 6, 5 + i, 0)
+				end
 			draw_string(string.format("                     "), screen_width + 6, 5, 0)
 		end
-	draw_string("Press one of WSAD keys to scroll the galaxy.", 0, 40, 0)
-	draw_string("Press CTRL+c to exit.", 0, 41, 0)
+	draw_string("Press one of w s a d to scroll the galaxy.", 0, 40, 0)
+	draw_string("Press one of h j k l to control the spaceship.", 0, 41, 0)
+	draw_string("Press CTRL+c to exit.", 0, 43, 0)
 end

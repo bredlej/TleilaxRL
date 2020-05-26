@@ -18,6 +18,10 @@ galaxy = {
 }
 rnd = {}
 
+function stop()
+	HOST_stop()
+end
+
 function randomize_seed(x, y)
 --	print(string.format("Lua called randomize_seed(%d, %d)", x, y))
 	return HOST_randomize_seed_xy(x, y) 
@@ -32,7 +36,6 @@ function random_double(x, y)
 --	print(string.format("Lua called random_double(%d, %d)", x, y))
 	return HOST_random_double(x, y)
 end
-
 
 function galaxy_set_offset(x, y)
 	galaxy["offset_x"] = x

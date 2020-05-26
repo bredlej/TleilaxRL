@@ -15,7 +15,7 @@ struct lua {
 	int (*close_script)	(lua_State*);
 	void (*render_state) (lua_State *);
 	void (*key_pressed) (lua_State *, const char *, const long);
-	
+	int (*stop) ();
 	/* -- private -- */
 
 	/* Functions needed to be bound for use in Lua scripts */
@@ -24,6 +24,7 @@ struct lua {
 	int (*p_rnd_int_range_function) (const int, const int);
 	double (*p_rnd_double_range_function) (const double, const double);
 	int (*p_draw_char_function) (const int, const int, const char *, const int);
+	void (*p_stop_function) (int);
 };
 
 

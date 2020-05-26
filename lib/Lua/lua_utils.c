@@ -8,6 +8,7 @@
 #define FUNC_NAME_RANDOM_INT "HOST_random_int"
 #define FUNC_NAME_RANDOM_DOUBLE "HOST_random_double"
 #define FUNC_NAME_DRAW_CHAR "HOST_draw_char"
+#define FUNC_NAME_STOP "HOST_stop"
 
 #define LUA_FUNC_RANDOMIZE_SEED "randomize_seed"
 #define LUA_FUNC_RANDOM_INT "random_int"
@@ -68,6 +69,13 @@ static int lua_stackprepare_draw_string(lua_State *L)
 	return 0;
 }
 
+static int lua_stop() 
+{
+	Lua.p_stop_function(1);
+
+	return 0;
+}
+
 /** 
  * Glue Lua and C functions together
  */
@@ -77,6 +85,7 @@ void register_lua_function_bindings (lua_State *L)
 	lua_register(L, FUNC_NAME_RANDOM_INT, lua_stackprepare_rnd_int_range);
 	lua_register(L, FUNC_NAME_RANDOM_DOUBLE, lua_stackprepare_rnd_double_range);
 	lua_register(L, FUNC_NAME_DRAW_CHAR, lua_stackprepare_draw_string);	
+	lua_register(L, FUNC_NAME_STOP, lua_stop);
 }
 
 /** 
@@ -147,5 +156,6 @@ struct lua Lua = {
 	.render_state = lua_render_state,
 	.load_script = lua_load_script,
 	.close_script = close_lua_State,
-	.key_pressed = lua_key_pressed
+	.key_pressed = lua_key_pressed,
+	.stop = lua_stop
 };

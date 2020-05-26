@@ -15,7 +15,6 @@
 
 #include "lib/TimeOps/timeops.h"
 #include "lib/Random/random.h"
-#include "lib/Galaxy/galaxy.h"
 #include "lib/NcursesTools/ncurses_tools.h"
 #include "lib/Lua/lua_utils.h"
 

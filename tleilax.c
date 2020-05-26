@@ -22,10 +22,6 @@
 #define MS_PER_UPDATE_GRAPHICS 16
 #define MS_PER_UPDATE_LOGIC 1000 
 
-struct application {
-	struct config Config; 
-} Application;
-
 /** 
  * Global variable determining if main loop should run 
  */
@@ -58,21 +54,15 @@ int init()
 	return 0;
 }
 
-int move_galaxy_on_input(double *galaxy_offset_x, double *galaxy_offset_y, const float speed, const float elapsed_ms)
+int handle_user_input(lua_State *L, const float elapsed_ms)
 {
 	if (Ncurses.kbhit()) {
 		char ch = getch();
-		if (ch == 'a') {
-			*galaxy_offset_x -= speed * elapsed_ms;
-		}
-		if (ch == 's') {
-			*galaxy_offset_y += speed * elapsed_ms;
-		}
-		if (ch == 'w') {
-			*galaxy_offset_y -= speed * elapsed_ms;
-		}
-		if (ch == 'd') {
-			*galaxy_offset_x += speed * elapsed_ms;
+		if (isascii(ch)) {
+			/* If char pressed is a valid ASCII char convert it to a string and pass to Lua */
+			char key[2];
+			sprintf (key, "%c", (char) ch);
+			Lua.key_pressed(L, key, elapsed_ms);
 		}
 	}		
 
@@ -90,8 +80,6 @@ int move_galaxy_on_input(double *galaxy_offset_x, double *galaxy_offset_y, const
 int main(int argc, char **argv)
 {
 	init();
-	Application.Config = Lua.load_configuration("./lua/config.lua");
-	int lua_output = Lua.randomize_seed("./lua/galaxy.lua", 1, 10);
 	
 	Ncurses.init_config();
 
@@ -102,11 +90,7 @@ int main(int argc, char **argv)
 	/* Stop program on CTRL+c */
 	signal(SIGINT, stop);
 
-
-	char debug_galaxy_xy[100];
-
-	//Lua.p_randomize_seed_xy_function = test_function;
-	lua_State *L = lua_load_galaxy_script("lua/galaxy.lua");
+	lua_State *L = Lua.load_script("lua/galaxy.lua");
 	/*
 	 * Main program loop
 	 */
@@ -115,7 +99,7 @@ int main(int argc, char **argv)
 		current_ms = get_current_time();
 
 		/* Update if enough time elapsed */
-		if (count_ms > Application.Config.ms_per_update_logic) {
+		if (count_ms > MS_PER_UPDATE_LOGIC) {
 			count_ms = 0;
 		}
 		
@@ -126,25 +110,22 @@ int main(int argc, char **argv)
 		lag_ms += elapsed_ms;
 		
 		/* Update the background according to lag */
-		while (lag_ms >= Application.Config.ms_per_update_graphics) 
+		while (lag_ms >= MS_PER_UPDATE_GRAPHICS) 
 		{
-			lag_ms -= Application.Config.ms_per_update_graphics;
+			lag_ms -= MS_PER_UPDATE_GRAPHICS;
 		}
 
-		move_galaxy_on_input(&Galaxy.offset_x, &Galaxy.offset_y, Application.Config.scroll_speed, elapsed_ms);
+		handle_user_input(L, elapsed_ms);
+
 		refresh();
 		
-		Lua.draw_galaxy(L, 64, 32);	
-		
-		wmove(stdscr, 0 ,0);
-		sprintf(debug_galaxy_xy, "x=[%.02f] y=[%0.2f], Lua=[%d]", Galaxy.offset_x, Galaxy.offset_y, lua_output);
-		mvaddstr(3, Application.Config.screen_width >> 1, debug_galaxy_xy);
-		mvaddstr(40, 0, "Press one of WSAD to move the screen.");
-		mvaddstr(41, 0, "Press CTRL+c to exit.");
+		Lua.render_state(L);	
 	}
 	/* Exit program */
 	endwin();
-	close_galaxy_script(L);	
+
+	Lua.close_script(L);	
+
 	/* Exit */	
 	return 0;
 }

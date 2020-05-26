@@ -10,7 +10,11 @@
 --- 
 galaxy = {
 	["offset_x"] = 0, 
-	["offset_y"] = 0
+	["offset_y"] = 0,
+	["scroll_left"] = function(time_ms) galaxy["offset_x"] = galaxy["offset_x"] - scroll_speed * time_ms end,
+	["scroll_right"] = function(time_ms) galaxy["offset_x"] = galaxy["offset_x"] + scroll_speed * time_ms end,
+	["scroll_up"] = function(time_ms) galaxy["offset_y"] = galaxy["offset_y"] - scroll_speed * time_ms end,
+	["scroll_down"] = function(time_ms) galaxy["offset_y"] = galaxy["offset_y"] + scroll_speed * time_ms end,
 }
 rnd = {}
 
@@ -29,11 +33,12 @@ function random_double(x, y)
 	return HOST_random_double(x, y)
 end
 
+
 function galaxy_set_offset(x, y)
 	galaxy["offset_x"] = x
 	galaxy["offset_y"] = y
 end
 
-function galaxy_draw_char(char, x, y, color)
+function draw_string(char, x, y, color)
 	HOST_draw_char(char, x, y, color)
 end

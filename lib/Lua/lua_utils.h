@@ -3,30 +3,29 @@
 
 typedef struct lua_State lua_State;
 
-struct config {
-	int screen_width;
-	int screen_height;
-	int scroll_speed;
-	int ms_per_update_logic;
-	int ms_per_update_graphics;
-};
-
+/**
+ * Lua interface declaration
+ */
 struct lua {
 	/* -- public  -- */
-	struct config (*load_configuration) (const char*);
-	int (*randomize_seed) (const char *, const int x, const int y);
-	void (*draw_galaxy) (lua_State *, const int, const int);
 
+	/* Functions made available by lua struct */
+
+	lua_State* (*load_script) (const char *);
+	int (*close_script)	(lua_State*);
+	void (*render_state) (lua_State *);
+	void (*key_pressed) (lua_State *, const char *, const long);
+	
 	/* -- private -- */
-	/* pointer to a randomize_seed(x,y) function used by Lua scripts */
+
+	/* Functions needed to be bound for use in Lua scripts */
+
 	unsigned int (*p_randomize_seed_xy_function) (const int, const int);
 	int (*p_rnd_int_range_function) (const int, const int);
-	int (*p_rnd_double_range_function) (const double, const double);
+	double (*p_rnd_double_range_function) (const double, const double);
 	int (*p_draw_char_function) (const int, const int, const char *, const int);
 };
 
-lua_State *lua_load_galaxy_script(const char *);
-int close_galaxy_script(lua_State *);
 
 /* Export as a "namespaced" global variable */
 extern struct lua Lua;

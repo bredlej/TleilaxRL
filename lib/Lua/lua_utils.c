@@ -13,47 +13,12 @@
 #define LUA_FUNC_RANDOM_INT "random_int"
 #define LUA_FUNC_RANDOM_DOUBLE "random_double"
 #define LUA_FUNC_GALAXY_SET_OFFSET "galaxy_set_offset"
-#define LUA_FUNC_GALAXY_DRAW_CHAR "galaxy_draw_char"
+#define LUA_FUNC_DRAW_STRING "draw_string"
 #define LUA_FUNC_DRAW_GALAXY "draw_galaxy"
+#define LUA_FUNC_KEY_PRESSED "key_pressed"
 
 /** 
- * Load configuration in script given by the filename and return as config struct 
- */
-struct config lua_load_configuration(const char* filename)
-{
-	struct config configuration;
-
-	lua_State *L = luaL_newstate();
-	luaL_openlibs(L);
-	if (luaL_loadfile(L, filename)  || lua_pcall(L, 0, 0, 0)) {
-		error(L, "Can't run configuration file %s\n", lua_tostring(L, -1));		
-	}
-	lua_getglobal(L, "screen_width");
-	lua_getglobal(L, "screen_height");
-	lua_getglobal(L, "scroll_speed");
-	lua_getglobal(L, "ms_per_update_graphics");
-	lua_getglobal(L, "ms_per_update_logic");
-	
-	if (!lua_isnumber(L, -1)) error (L, "'ms_per_update_logic' should be a number\n");
-	if (!lua_isnumber(L, -2)) error (L, "'ms_per_update_graphics' should be a number\n");
-	if (!lua_isnumber(L, -3)) error (L, "'scroll_speed' should be a number\n");
-	if (!lua_isnumber(L, -4)) error (L, "'screen_height' should be a number\n");
-	if (!lua_isnumber(L, -5)) error (L, "'screen_width' should be a number\n");
-
-	configuration.ms_per_update_logic = (int) lua_tonumber(L, -1);
-	configuration.ms_per_update_graphics = (int) lua_tonumber(L, -2);
-	configuration.scroll_speed = (float) lua_tonumber(L, -3);
-	configuration.screen_height = (int) lua_tonumber(L, -4);
-	configuration.screen_width = (int) lua_tonumber(L, -5);
-
-	lua_close(L);
-
-	return configuration;
-}
-
-/**
- *	Bind function pointed by Lua.p_randomize_seed_xy_function to Lua handler
- *	and push its parameters on the stack.
+ * Handle Lua stack for 'randomize_seed(x, y)' call of C function
  */
 static int lua_stackprepare_randomize_seed_xy(lua_State *L) 
 {
@@ -64,6 +29,9 @@ static int lua_stackprepare_randomize_seed_xy(lua_State *L)
 	return 1; // number of results in output from Lua function call
 }
 
+/** 
+ * Handle Lua stack for 'random_int(x, y)' call of C function
+ */
 static int lua_stackprepare_rnd_int_range(lua_State *L) 
 {
 	int x = luaL_checknumber(L, 1);
@@ -73,6 +41,9 @@ static int lua_stackprepare_rnd_int_range(lua_State *L)
 	return 1;
 }
 
+/** 
+ * Handle Lua stack for 'random_double(x, y)' call of C function
+ */
 static int lua_stackprepare_rnd_double_range(lua_State *L) 
 {
 	double x = luaL_checknumber(L, 1);
@@ -82,7 +53,10 @@ static int lua_stackprepare_rnd_double_range(lua_State *L)
 	return 1;
 }
 
-static int lua_stackprepare_galaxy_draw_char(lua_State *L)
+/** 
+ * Handle Lua stack for draw_string(text, x, y, color_index) call of C function
+ */
+static int lua_stackprepare_draw_string(lua_State *L)
 {
 	const char *c = (const char *) luaL_checkstring(L, 1);
 	int x = (int) luaL_checknumber(L, 2);
@@ -94,86 +68,84 @@ static int lua_stackprepare_galaxy_draw_char(lua_State *L)
 	return 0;
 }
 
-lua_State *lua_load_galaxy_script(const char *filename) {
-	lua_State *L = luaL_newstate();
-	luaL_openlibs(L);
+/** 
+ * Glue Lua and C functions together
+ */
+void register_lua_function_bindings (lua_State *L) 
+{
 	lua_register(L, FUNC_NAME_RANDOMIZE_SEED_XY, lua_stackprepare_randomize_seed_xy);
 	lua_register(L, FUNC_NAME_RANDOM_INT, lua_stackprepare_rnd_int_range);
-	lua_register(L, FUNC_NAME_DRAW_CHAR, lua_stackprepare_galaxy_draw_char);
+	lua_register(L, FUNC_NAME_RANDOM_DOUBLE, lua_stackprepare_rnd_double_range);
+	lua_register(L, FUNC_NAME_DRAW_CHAR, lua_stackprepare_draw_string);	
+}
+
+/** 
+ * Opens a Lua script and registers C function bindings
+ *
+ * @param filename - path to script
+ * @return lua_State - Lua interpreter instance
+ */
+lua_State *lua_load_script(const char *filename) {
+	lua_State *L = luaL_newstate();
+	luaL_openlibs(L);
 	
+	register_lua_function_bindings(L);
+
 	if (luaL_loadfile(L, filename)|| lua_pcall(L, 0, 0, 0)) error (L, "Error loading file. :%s", lua_tostring(L, -1));
 	return L;
 }
 
-int close_galaxy_script(lua_State *lua_state_handler) {
-	lua_close(lua_state_handler);
+/**
+ * Closes a Lua interpreter
+ *
+ * @param L - Lua interpreter instance
+ */
+int close_lua_State(lua_State *L) {
+	lua_close(L);
 	return 0;
 }
 
 /**
- *	Runs the randomize_seed(x,y) function inside Lua script with given filename and parameters
+ * Performs a call to Lua render it's state
+ *
+ * TODO declare content as Lua.p_renderer_function call, instead of specific implementation.
+ *
+ * @param L - Lua interpreter instance
  */
-int lua_randomize_seed(const char * filename, int x, int y)
+void lua_render_state(lua_State *L)
 {
-	lua_State *L = lua_load_galaxy_script(filename);
-	/* Find function to call inside Lua script */
-	lua_getglobal(L, LUA_FUNC_RANDOMIZE_SEED);
-	
-	/* If there's a function on the stack, push attributes and call it */
-	if (lua_isfunction(L, -1)){
-		lua_pushnumber(L, x);
-		lua_pushnumber(L, y);
-
-		/* Takes 2 parameters and gives 1 result */
-		if (lua_pcall(L, 2, 1, 0)) error (L, "Error %s\n", lua_tostring(L, -1));
-	}
-	else {
-		error (L, "Error: %s\n", lua_tostring(L, -1));
-	}
-
-	/* If result is not a number something went wrong */	
-	if (!lua_isnumber(L, -1)) error (L, "Got wrong result type from %s call.\n", LUA_FUNC_RANDOMIZE_SEED);
-
-	/* Get result from Lua function call */
-	int result = (int) lua_tonumber(L, -1);
-	
-	/* Close handler and return result to caller*/
-	lua_close(L);
-
-	return result;
-}	
-
-void lua_draw_galaxy(lua_State *L, const int x, const int y)
-{
-	/* Find function to call inside Lua script */
-/*	lua_getglobal(L, LUA_FUNC_GALAXY_DRAW_CHAR);
-
-	if (lua_isfunction(L, -1)){
-		lua_pushstring(L, "X");
-		lua_pushnumber(L, x);
-		lua_pushnumber(L, y);
-		lua_pushnumber(L, 1);
-		if (lua_pcall(L, 4, 0, 0)) error (L, "Error %s\n", lua_tostring(L, -1));
-	}
-	else {
-		error (L, "Error: %s\n", lua_tostring(L, -1));
-	}
-*/
 	lua_getglobal(L, LUA_FUNC_DRAW_GALAXY);
 	if (lua_isfunction(L, -1)) {
-		lua_pushnumber(L, x);
-		lua_pushnumber(L, y);
-		if (lua_pcall(L, 2, 0, 0)) error (L, "Error %s\n", lua_tostring(L, -1));
+		if (lua_pcall(L, 0, 0, 0)) error (L, "Error %s\n", lua_tostring(L, -1));
 	}
 	else {
 		error (L, "Error: %s\n", lua_tostring(L, -1));
 	}
-
 }
 
-/* Export prepared functions inside "namespaced" global variable */
+/**
+ * Calls Lua key_pressed function
+ *
+ * @param L - Lua interpreter instance
+ * @param key - valid ASCII key that was pressed, formatted as string
+ * @param time_ms - value telling how much miliseconds elapsed since last main loop turn
+ */
+void lua_key_pressed(lua_State *L, const char* key, const long time_ms) 
+{
+	lua_getglobal(L, LUA_FUNC_KEY_PRESSED);
+	if (lua_isfunction(L, -1)) {
+		lua_pushstring(L, key);
+		lua_pushnumber(L, time_ms);
+		if (lua_pcall(L, 2, 0, 0)) error (L, "Error %s\n", lua_tostring(L, -1));
+	}
+}
+
+/** 
+ * Export prepared functions inside "namespaced" global variable 
+ */
 struct lua Lua = {
-	.load_configuration = lua_load_configuration,
-	.randomize_seed = lua_randomize_seed,
-	.draw_galaxy = lua_draw_galaxy
+	.render_state = lua_render_state,
+	.load_script = lua_load_script,
+	.close_script = close_lua_State,
+	.key_pressed = lua_key_pressed
 };

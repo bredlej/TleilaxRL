@@ -25,7 +25,7 @@ For running the program, clone it from github then go inside the folder and type
 ```
 The program uses Lua scripts for generation of the stars, user input etc. which are in the ./lua/ folder.
 
-Please contact me if there are any issues or you need help to getting it to run.
+Please contact me if there are any issues or you need help with getting it to run.
 
 ## Author
 

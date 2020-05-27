@@ -33,5 +33,8 @@ Please contact me if there are any issues or you need help with getting it to ru
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+This project (with exceptions) is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
+### Exceptions of licensing:
+This project uses the PCG Random Minimal C Implementation - https://github.com/imneme/pcg-c-basic which is under the Apache License 2.0.
 

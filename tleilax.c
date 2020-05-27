@@ -34,9 +34,11 @@ static void stop (int sig)
 	program_is_running = 0;
 }
 
+/** 
+ * Declaration of Lua <-> C function bindings
+ */
 int init_lua_bindings()
 {
-	/* Set which randomize seed function Lua should use. */
 	Lua.p_randomize_seed_xy_function = Random.randomize_seed_xy;
 	Lua.p_rnd_int_range_function = Random.rnd_int_range;
 	Lua.p_rnd_double_range_function = Random.rnd_double_range;
@@ -54,6 +56,9 @@ int init()
 	return 0;
 }
 
+/**
+ * Parse key catched by Ncurses and pass it to Lua script
+ */
 int handle_user_input(lua_State *L, const float elapsed_ms)
 {
 	if (Ncurses.kbhit()) {
@@ -73,9 +78,9 @@ int handle_user_input(lua_State *L, const float elapsed_ms)
  * Main program
  * 
  * 1. Initialize state
+ * 2. Load Lua script
  * 2. Run update-render loop
- * 3. On exit free memory & turn off OLED screen
- *
+ * 3. On exit close Lua handler and free memory
  */  
 int main(int argc, char **argv)
 {
@@ -84,13 +89,13 @@ int main(int argc, char **argv)
 	Ncurses.init_config();
 
 	long previous_ms = 0, current_ms = 0, elapsed_ms = 0, lag_ms = 0, count_ms = 0;
-	
 	previous_ms = get_current_time();
 
 	/* Stop program on CTRL+c */
 	signal(SIGINT, stop);
 
 	lua_State *L = Lua.load_script("lua/galaxy.lua");
+
 	/*
 	 * Main program loop
 	 */
@@ -115,15 +120,22 @@ int main(int argc, char **argv)
 			lag_ms -= MS_PER_UPDATE_GRAPHICS;
 		}
 
+		/* Catch user keypress and pass to Lua handler */
 		handle_user_input(L, elapsed_ms);
 
-		refresh();
+		/* Ncurses screen refresh */
+		refresh(); 
+
+		/* Call Lua render function */
 		Lua.render_state(L);	
 	}
+	
 	/* Exit program */
+
+	/* Ncurses close window */
 	endwin();
 
-	Lua.close_script(L);	
+	Lua.close_script(L); // Close running Lua handler
 
 	/* Exit */	
 	return 0;

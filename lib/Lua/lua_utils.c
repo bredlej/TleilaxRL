@@ -4,20 +4,6 @@
 #include <lualib.h>
 #include <stdlib.h>
 
-#define FUNC_NAME_RANDOMIZE_SEED_XY "HOST_randomize_seed_xy"
-#define FUNC_NAME_RANDOM_INT "HOST_random_int"
-#define FUNC_NAME_RANDOM_DOUBLE "HOST_random_double"
-#define FUNC_NAME_DRAW_CHAR "HOST_draw_char"
-#define FUNC_NAME_STOP "HOST_stop"
-
-#define LUA_FUNC_RANDOMIZE_SEED "randomize_seed"
-#define LUA_FUNC_RANDOM_INT "random_int"
-#define LUA_FUNC_RANDOM_DOUBLE "random_double"
-#define LUA_FUNC_GALAXY_SET_OFFSET "galaxy_set_offset"
-#define LUA_FUNC_DRAW_STRING "draw_string"
-#define LUA_FUNC_DRAW_GALAXY "draw_galaxy"
-#define LUA_FUNC_KEY_PRESSED "key_pressed"
-
 /** 
  * Handle Lua stack for 'randomize_seed(x, y)' call of C function
  */
@@ -69,9 +55,27 @@ static int lua_stackprepare_draw_string(lua_State *L)
 	return 0;
 }
 
+static int lua_init_color_pair(lua_State *L)
+{
+	short index = luaL_checknumber(L, 1);
+	short fg_color = luaL_checknumber(L, 2);
+	short bg_color = luaL_checknumber(L, 3);
+
+	Lua.p_init_pair_function(index, fg_color, bg_color);
+
+	return 1;
+}
+
 static int lua_stop() 
 {
 	Lua.p_stop_function(1);
+
+	return 0;
+}
+
+static int lua_clear()
+{
+	Lua.p_clear_function();
 
 	return 0;
 }
@@ -86,6 +90,8 @@ void register_lua_function_bindings (lua_State *L)
 	lua_register(L, FUNC_NAME_RANDOM_DOUBLE, lua_stackprepare_rnd_double_range);
 	lua_register(L, FUNC_NAME_DRAW_CHAR, lua_stackprepare_draw_string);	
 	lua_register(L, FUNC_NAME_STOP, lua_stop);
+	lua_register(L, FUNC_NAME_INIT_COLOR_PAIR, lua_init_color_pair);
+	lua_register(L, FUNC_NAME_CLEAR, lua_clear);
 }
 
 /** 
@@ -157,5 +163,5 @@ struct lua Lua = {
 	.load_script = lua_load_script,
 	.close_script = close_lua_State,
 	.key_pressed = lua_key_pressed,
-	.stop = lua_stop
+	.stop = lua_stop,
 };

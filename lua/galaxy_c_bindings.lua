@@ -8,6 +8,17 @@
 --
 
 --- 
+color = {
+	["BLACK"]   = 0,
+	["RED"]     = 1,
+	["GREEN"]   = 2,
+	["YELLOW"]  = 3,
+	["BLUE"]    = 4,
+	["MAGENTA"] = 5,
+	["CYAN"]    = 6,
+	["WHITE"]   = 7
+}
+
 galaxy = {
 	["offset_x"] = 0, 
 	["offset_y"] = 0,
@@ -44,4 +55,12 @@ end
 
 function draw_string(char, x, y, color)
 	HOST_draw_char(char, x, y, color)
+end
+
+function init_color_pair(index, fg_color, bg_color)
+	HOST_init_color_pair(index, fg_color, bg_color)
+end
+
+function clear()
+	HOST_clear()
 end

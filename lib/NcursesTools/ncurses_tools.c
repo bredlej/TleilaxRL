@@ -7,9 +7,9 @@ int init_ncurses_config()
 	cbreak();
 	noecho();
 	start_color();
-	init_pair(1, COLOR_YELLOW, COLOR_BLACK);
+/*	init_pair(1, COLOR_YELLOW, COLOR_BLACK);
 	init_pair(2, COLOR_BLUE, COLOR_BLACK);
-	init_pair(3, COLOR_GREEN, COLOR_BLACK);
+	init_pair(3, COLOR_GREEN, COLOR_BLACK);*/
 	curs_set(false);
 	nodelay(stdscr, TRUE);
 	scrollok(stdscr, TRUE);

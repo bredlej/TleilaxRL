@@ -43,7 +43,9 @@ int init_lua_bindings()
 	Lua.p_rnd_int_range_function = Random.rnd_int_range;
 	Lua.p_rnd_double_range_function = Random.rnd_double_range;
 	Lua.p_draw_char_function = Ncurses.draw_char;
+	Lua.p_clear_function = clear;
 	Lua.p_stop_function = stop;
+	Lua.p_init_pair_function = init_pair;
 	return 0;	
 }
 

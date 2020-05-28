@@ -16,11 +16,12 @@ local key_actions = {
 	["d"] = galaxy["scroll_right"],
 	["w"] = galaxy["scroll_up"],
 	["s"] = galaxy["scroll_down"],
+	["c"] = clear,
 	["q"] = stop,
-	["h"] = function () entities[0]["position"]["x"] = entities[0]["position"]["x"] - 1 end,
-	["k"] = function () entities[0]["position"]["y"] = entities[0]["position"]["y"] - 1 end,
-	["j"] = function () entities[0]["position"]["y"] = entities[0]["position"]["y"] + 1 end,
-	["l"] = function () entities[0]["position"]["x"] = entities[0]["position"]["x"] + 1 end
+	["h"] = function () clear() entities[0]["position"]["x"] = entities[0]["position"]["x"] - 1 end,
+	["k"] = function () clear() entities[0]["position"]["y"] = entities[0]["position"]["y"] - 1 end,
+	["j"] = function () clear() entities[0]["position"]["y"] = entities[0]["position"]["y"] + 1 end,
+	["l"] = function () clear() entities[0]["position"]["x"] = entities[0]["position"]["x"] + 1 end
 }
 
 
@@ -80,3 +81,7 @@ function draw_galaxy()
 	draw_string("Press one of h j k l to control the spaceship.", 0, 41, 0)
 	draw_string("Press CTRL+c to exit.", 0, 43, 0)
 end
+
+init_color_pair(1, color["YELLOW"], color["BLACK"])
+init_color_pair(2, color["CYAN"], color["BLACK"])
+init_color_pair(3, color["MAGENTA"], color["BLACK"])

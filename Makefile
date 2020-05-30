@@ -23,7 +23,7 @@ ncurses_tools.o: lib/NcursesTools/ncurses_tools.c lib/NcursesTools/ncurses_tools
 	$(CC) -c $(CFLAGS) lib/NcursesTools/ncurses_tools.c -lncurses
 
 lua_utils.o: lib/Lua/lua_utils.c lib/Lua/lua_utils.h 
-	$(CC) -c -I -fsyntax-only -g lib/Lua/lua_utils.c -llua5.3
+	$(CC) -c -I -fsyntax-only -g lib/Lua/lua_utils.c -llua5.3 -I/usr/include/lua5.3
 
 pcg_basic.o: lib/Random/pcg_basic.h
 	$(CC) -c $(CFLAGS) lib/Random/pcg_basic.c

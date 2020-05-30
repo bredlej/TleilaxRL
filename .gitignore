@@ -1,0 +1,8 @@
+# object files
+*.o
+
+# game executable
+tleilax
+
+# settings from IDE
+.vscode/

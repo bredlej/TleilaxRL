@@ -4,6 +4,24 @@
 #include <lualib.h>
 #include <stdlib.h>
 
+const char *FUNC_NAME_RANDOMIZE_SEED_XY = "HOST_randomize_seed_xy";
+const char *FUNC_NAME_RANDOM_INT = "HOST_random_int";
+const char *FUNC_NAME_RANDOM_DOUBLE = "HOST_random_double";
+const char *FUNC_NAME_DRAW_CHAR = "HOST_draw_char";
+const char *FUNC_NAME_STOP = "HOST_stop";
+const char *FUNC_NAME_INIT_COLOR_PAIR = "HOST_init_color_pair";
+const char *FUNC_NAME_CLEAR = "HOST_clear";
+
+const char *LUA_FUNC_RANDOMIZE_SEED = "randomize_seed";
+const char *LUA_FUNC_RANDOM_INT = "random_int";
+const char *LUA_FUNC_RANDOM_DOUBLE = "random_double";
+const char *LUA_FUNC_GALAXY_SET_OFFSET = "galaxy_set_offset";
+const char *LUA_FUNC_DRAW_STRING = "draw_string";
+const char *LUA_FUNC_DRAW_GALAXY = "draw_galaxy";
+const char *LUA_FUNC_KEY_PRESSED = "key_pressed";
+const char *LUA_FUNC_INIT_COLOR_PAIR = "init_color_pair";
+const char *LUA_FUNC_CLEAR = "clear";
+
 /** 
  * Handle Lua stack for 'randomize_seed(x, y)' call of C function
  */
@@ -66,7 +84,7 @@ static int lua_init_color_pair(lua_State *L)
 	return 1;
 }
 
-static int lua_stop() 
+static int lua_stop(lua_State *L) 
 {
 	Lua.p_stop_function(1);
 
@@ -106,7 +124,7 @@ lua_State *lua_load_script(const char *filename) {
 	
 	register_lua_function_bindings(L);
 
-	if (luaL_loadfile(L, filename)|| lua_pcall(L, 0, 0, 0)) error (L, "Error loading file. :%s", lua_tostring(L, -1));
+	if (luaL_loadfile(L, filename)|| lua_pcall(L, 0, 0, 0)) luaL_error (L, "Error loading file. :%s", lua_tostring(L, -1));
 	return L;
 }
 
@@ -115,7 +133,7 @@ lua_State *lua_load_script(const char *filename) {
  *
  * @param L - Lua interpreter instance
  */
-int close_lua_State(lua_State *L) {
+uint32_t close_lua_State(lua_State *L) {
 	lua_close(L);
 	return 0;
 }
@@ -127,14 +145,15 @@ int close_lua_State(lua_State *L) {
  *
  * @param L - Lua interpreter instance
  */
-void lua_render_state(lua_State *L)
+void lua_render_state(lua_State *L, const uint32_t elapsed_ms)
 {
 	lua_getglobal(L, LUA_FUNC_DRAW_GALAXY);
 	if (lua_isfunction(L, -1)) {
-		if (lua_pcall(L, 0, 0, 0)) error (L, "Error %s\n", lua_tostring(L, -1));
+		lua_pushnumber(L, elapsed_ms);
+		if (lua_pcall(L, 1, 0, 0)) luaL_error (L, "Error %s\n", lua_tostring(L, -1));
 	}
 	else {
-		error (L, "Error: %s\n", lua_tostring(L, -1));
+		luaL_error (L, "Error: %s\n", lua_tostring(L, -1));
 	}
 }
 
@@ -145,13 +164,13 @@ void lua_render_state(lua_State *L)
  * @param key - valid ASCII key that was pressed, formatted as string
  * @param time_ms - value telling how much miliseconds elapsed since last main loop turn
  */
-void lua_key_pressed(lua_State *L, const char* key, const long time_ms) 
+void lua_key_pressed(lua_State *L, const char* key, const uint32_t time_ms) 
 {
 	lua_getglobal(L, LUA_FUNC_KEY_PRESSED);
 	if (lua_isfunction(L, -1)) {
 		lua_pushstring(L, key);
 		lua_pushnumber(L, time_ms);
-		if (lua_pcall(L, 2, 0, 0)) error (L, "Error %s\n", lua_tostring(L, -1));
+		if (lua_pcall(L, 2, 0, 0)) luaL_error (L, "Error %s\n", lua_tostring(L, -1));
 	}
 }
 

@@ -1,7 +1,7 @@
 #include "ncurses_tools.h"
 #include <ncurses.h>
 
-int init_ncurses_config() 
+uint32_t init_ncurses_config() 
 {
 	initscr();
 	cbreak();
@@ -17,7 +17,7 @@ int init_ncurses_config()
 	return 0;
 }
 
-int draw_char(const int x, const int y, const char *character, const int color) 
+uint32_t draw_char(const uint32_t x, const uint32_t y, const char *character, const uint32_t color) 
 {
 	attron(COLOR_PAIR(color));
 	mvaddstr(y, x, character);
@@ -26,9 +26,9 @@ int draw_char(const int x, const int y, const char *character, const int color)
 	return 0;
 }
 
-int kbhit(void)
+uint32_t kbhit(void)
 {
-	int ch = getch();
+	uint32_t ch = getch();
 	if (ch != ERR) {
 		ungetch(ch);
 		return 1;

@@ -1,13 +1,6 @@
 -- Module to define C/Lua bindings used in galaxy.lua
+-- see lib/Lua/lua_utils.h for which HOST_* functions need to be defined here
 
--- Following functions need to be registered in the C source:
--- HOST_randomize_seed_xy (int x, int y)
--- HOST_random_int (int x, int y)
--- HOST_random_double (int x, int y)
--- HOST_draw_char
---
-
---- 
 color = {
 	["BLACK"]   = 0,
 	["RED"]     = 1,

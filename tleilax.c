@@ -12,7 +12,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
-
+#include <stdint.h>
 #include "lib/TimeOps/timeops.h"
 #include "lib/Random/random.h"
 #include "lib/NcursesTools/ncurses_tools.h"
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 	
 	Ncurses.init_config();
 
-	long previous_ms = 0, current_ms = 0, elapsed_ms = 0, lag_ms = 0, count_ms = 0;
+	uint32_t previous_ms = 0, current_ms = 0, elapsed_ms = 0, lag_ms = 0, count_ms = 0;
 	previous_ms = get_current_time();
 
 	/* Stop program on CTRL+c */
@@ -129,7 +129,7 @@ int main(int argc, char **argv)
 		refresh(); 
 
 		/* Call Lua render function */
-		Lua.render_state(L);	
+		Lua.render_state(L, elapsed_ms);
 	}
 	
 	/* Exit program */

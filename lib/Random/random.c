@@ -3,22 +3,22 @@
 
 pcg32_random_t rng;
 
-unsigned int rnd() 
+uint32_t rnd(void) 
 {
 	return pcg32_random_r(&rng);
 } 
 
-double rndDouble(double min, double max) 
+double rndDouble(const double min, const double max) 
 {
 	return ((double) rnd() / (double) (0xFFFFFFFF)) * (max - min) + min;
 }
 
-int rndInt(int min, int max)
+uint32_t rndInt(const uint32_t min, const uint32_t max)
 {
 	return (rnd() % (max - min)) + min;
 }
 
-unsigned int randomize_seed_xy(const int x, const int y)
+uint32_t randomize_seed_xy(const uint32_t x, const uint32_t y)
 {
 	pcg32_srandom_r(&rng, ((x + y) >> 1) * (x + y + 1) +y, ((x + y) >> 1) );
 	return rnd();

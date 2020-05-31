@@ -1,6 +1,8 @@
+local C = require('lua/c_bindings')
+
 -- Meta class Star
-function random_type()
-	randomNum = random_int(0,100);
+local function random_type()
+	local randomNum = C.random_int(0,100);
 	if (randomNum < 10) 
 		then
 			return 1
@@ -9,7 +11,7 @@ function random_type()
 			return 2
 		else
 			return 3
-		end			
+		end
 	end
 end
 
@@ -21,9 +23,9 @@ Star = {
 	x = 0,
 	y = 0,
 	existsAt = function(self, x, y)
-		randomize_seed(self.x, self.y)
-		return random_int(0, 43) == 0
-	end,	
+		C.randomize_seed(self.x, self.y)
+		return C.random_int(0, 43) == 0
+	end,
 	init = function(self, x, y)
 		self.planets = {}
 		self.x = x
@@ -32,7 +34,7 @@ Star = {
 		else
 			self.exists = true
 			self.type = random_type()
-			self.amount_planets = random_int(1, 9)
+			self.amount_planets = C.random_int(1, 9)
 			for x = 0, self.amount_planets, 1 
 				do
 					planet = {["type"] = random_type()}

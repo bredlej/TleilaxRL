@@ -1,22 +1,23 @@
+#include <ctype.h>
+#include <errno.h>
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+#include <ncurses.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
-#include <ctype.h>
-#include <errno.h>
-#include <ncurses.h>
 #include <unistd.h>
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-#include <stdint.h>
-#include "lib/TimeOps/timeops.h"
-#include "lib/Random/random.h"
-#include "lib/NcursesTools/ncurses_tools.h"
+
 #include "lib/Lua/lua_utils.h"
+#include "lib/NcursesTools/ncurses_tools.h"
+#include "lib/Random/random.h"
+#include "lib/TimeOps/timeops.h"
 
 #define MS_PER_UPDATE_GRAPHICS 16
 #define MS_PER_UPDATE_LOGIC 1000 
@@ -46,6 +47,7 @@ int init_lua_bindings()
 	Lua.p_clear_function = clear;
 	Lua.p_stop_function = stop;
 	Lua.p_init_pair_function = init_pair;
+
 	return 0;	
 }
 
@@ -55,6 +57,7 @@ int init_lua_bindings()
 int init() 
 {
 	init_lua_bindings();
+
 	return 0;
 }
 
@@ -132,8 +135,6 @@ int main(int argc, char **argv)
 		Lua.render_state(L, elapsed_ms);
 	}
 	
-	/* Exit program */
-
 	/* Ncurses close window */
 	endwin();
 

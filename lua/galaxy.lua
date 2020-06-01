@@ -3,7 +3,7 @@ local C = require 'lua/c_bindings'
 local machine = require 'lua/statemachine'
 local inspect = require "lua/inspect"
 
-require 'lua/config'
+local config = require 'lua/config'
 require 'lua/star'
 
 local ui_state = machine.create({
@@ -28,8 +28,12 @@ end
 local entities = {
 	[0] = {
 		["position"] = {
-			["x"] = screen_width / 2,
-			["y"] = screen_height / 2
+			["x"] = config.screen_width / 2,
+			["y"] = config.screen_height / 2
+		},
+		["fuel"] = {
+			["current"] = 30,
+			["max"] = 30
 		}
 	}
 }
@@ -37,25 +41,39 @@ local entities = {
 local player = {
 	["move"] = {
 		["left"] = function()
-			player_has_moved = true 
-			entities[0]["position"]["x"] = entities[0]["position"]["x"] - 1
+			if ((entities[0])["fuel"]["current"] > 0) 
+				then
+					player_has_moved = true
+					entities[0]["position"]["x"] = entities[0]["position"]["x"] - 1
+					entities[0]["fuel"]["current"] = entities[0]["fuel"]["current"] - 1
+				end
 		end,
 		["right"] = function()
-			player_has_moved = true 
-			entities[0]["position"]["x"] = entities[0]["position"]["x"] + 1
+			if ((entities[0])["fuel"]["current"] > 0) 
+				then
+					player_has_moved = true
+					entities[0]["position"]["x"] = entities[0]["position"]["x"] + 1
+					entities[0]["fuel"]["current"] = entities[0]["fuel"]["current"] - 1
+				end
 		end,
 		["down"] = function()
-			player_has_moved = true 
-			entities[0]["position"]["y"] = entities[0]["position"]["y"] + 1
+			if ((entities[0])["fuel"]["current"] > 0) 
+				then
+					player_has_moved = true
+					entities[0]["position"]["y"] = entities[0]["position"]["y"] + 1
+					entities[0]["fuel"]["current"] = entities[0]["fuel"]["current"] - 1
+				end
 		end,
 		["up"] = function()
-			player_has_moved = true 
-			entities[0]["position"]["y"] = entities[0]["position"]["y"] - 1
+			if ((entities[0])["fuel"]["current"] > 0) 
+				then
+					player_has_moved = true
+					entities[0]["position"]["y"] = entities[0]["position"]["y"] - 1
+					entities[0]["fuel"]["current"] = entities[0]["fuel"]["current"] - 1
+				end
 		end
 	}
 }
-
-local player_has_moved = false
 
 local states = {
 	["galaxy_view"] = require ("lua/states/galaxymap"),
@@ -64,11 +82,11 @@ local states = {
 
 
 key_actions = {
-	["a"] = states[ui_state.current].handle_events["scroll_left"],
+	["a"] = states[ui_state.current].input_map["a"],
 
-	["d"] = states[ui_state.current].handle_events["scroll_right"],
-	["w"] = states[ui_state.current].handle_events["scroll_up"],
-	["s"] = states[ui_state.current].handle_events["scroll_down"],
+	["d"] = states[ui_state.current].input_map["d"],
+	["w"] = states[ui_state.current].input_map["w"],
+	["s"] = states[ui_state.current].input_map["s"],
 	["c"] = C.clear,
 	["q"] = C.stop,
 	["h"] = player["move"]["left"],
@@ -85,12 +103,32 @@ function key_pressed(key, time_ms)
 	end
 end
 
-C.init_color_pair(1, G.color["YELLOW"], G.color["BLACK"])
-C.init_color_pair(2, G.color["CYAN"], G.color["BLACK"])
-C.init_color_pair(3, G.color["MAGENTA"], G.color["BLACK"])
-
-
+function draw_fuel_indicator(fuel_component, x, y)
+	C.draw_string(string.format("Fuel [           ]: %d/%d", fuel_component["current"], fuel_component["max"]), x, y, 0)
+	local color
+	for i = 0, math.floor(11 * (fuel_component["current"] / fuel_component["max"])) - 1, 1
+		do
+			if (i < 4) then color = 6
+			elseif (i >= 4)  and (i < 8) then color = 5
+			else color = 7 end
+			C.draw_string("#", x+6+i, y, color)
+		end
+end
 
 function draw_galaxy(elapsed_ms)
 	states[ui_state.current]:draw({["elapsed"] = elapsed_ms, ["entities"] = entities})
+	draw_fuel_indicator(entities[0]["fuel"], config.screen_width + 12, 5)
+	C.draw_string("Press one of w s a d to scroll the galaxy.", 0, 40, 0)
+	C.draw_string("Press one of h j k l to control the spaceship.", 0, 41, 0)
+	C.draw_string("Press CTRL+c to exit.", 0, 43, 0)
 end
+
+C.init_color_pair(1, G.color["BLACK"], G.color["BLACK"])
+C.init_color_pair(2, G.color["RED"], G.color["BLACK"])
+C.init_color_pair(3, G.color["GREEN"], G.color["BLACK"])
+C.init_color_pair(4, G.color["YELLOW"], G.color["BLACK"])
+C.init_color_pair(5, G.color["BLUE"], G.color["BLACK"])
+C.init_color_pair(6, G.color["MAGENTA"], G.color["BLACK"])
+C.init_color_pair(7, G.color["CYAN"], G.color["BLACK"])
+C.init_color_pair(8, G.color["WHITE"], G.color["BLACK"])
+

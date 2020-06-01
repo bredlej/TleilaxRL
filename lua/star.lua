@@ -10,15 +10,22 @@ local function random_type()
 		then
 			return 2
 		else
-			return 3
+			return 3 
 		end
 	end
 end
 
 
+local type_to_color = {
+	[1] = 6,
+	[2] = 7,
+	[3] = 5
+}
+
 Star = {
 	exists = false,
 	type = 1,
+	color_idx = 1,
 	planets = {},
 	x = 0,
 	y = 0,
@@ -34,11 +41,12 @@ Star = {
 		else
 			self.exists = true
 			self.type = random_type()
+			self.color_idx = type_to_color[self.type]
 			self.amount_planets = C.random_int(1, 9)
-			for x = 0, self.amount_planets, 1 
+			for i = 0, self.amount_planets, 1
 				do
-					planet = {["type"] = random_type()}
-					self.planets[x] = planet
+					local planet = {["type"] = random_type()}
+					self.planets[i] = planet
 				end
 		end
 	end

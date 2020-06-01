@@ -8,11 +8,6 @@ local handle_events = {
 		["scroll_up"] = function(time_ms) G.galaxy["offset_y"] = G.galaxy["offset_y"] - config.scroll_speed * time_ms end,
 		["scroll_down"] = function(time_ms) G.galaxy["offset_y"] = G.galaxy["offset_y"] + config.scroll_speed * time_ms end,
 	}
-local type_to_color = {
-	[1] = 6,
-	[2] = 7,
-	[3] = 5
-}
 local galaxy_state = {
 	draw = function (self, args)
 	local elapsed_ms = args["elapsed"]
@@ -29,7 +24,7 @@ local galaxy_state = {
 				star:init(x + math.floor(G.galaxy["offset_x"]), y + math.floor(G.galaxy["offset_y"]))
 				if (star.exists)
 				then
-					C.draw_string(type_to_char[star.type], x+5, y+5, star.color_idx)
+					C.draw_string(type_to_char[star.type], x+5, y+5, star.type)
 				else
 					C.draw_string(" ", x+5, y+5, 1);
 				end
@@ -52,13 +47,13 @@ local galaxy_state = {
 	end	
 	if (player_at_star)
 		then
-			C.draw_string(string.format("You found a star system!"), config.screen_width + 12, 10, 0)
+			C.draw_string(string.format("Encountered Star!"), config.screen_width + 6, 5, 0)
 			local i = 0
 			for planet_idx = 0, player_at_star.amount_planets, 1
 				do
 					planets = player_at_star.planets
-					C.draw_string(string.format("Planets"), config.screen_width + 15, 12 , 0)
-					C.draw_string(string.format(" O "), config.screen_width + 15 +(i*3), 13 , type_to_color[planets[i]["type"]])
+					C.draw_string(string.format("Planets"), config.screen_width + 6, 7 , 0)
+					C.draw_string(string.format(" O "), config.screen_width + 15 +(i*3), 7 , planets[i]["type"])
 					i = i + 1
 				end
 		else

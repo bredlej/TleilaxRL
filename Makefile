@@ -1,4 +1,4 @@
-CC=clang-9
+CC=clang
 CFLAGS=-Wall -I -fsyntax-only -g
 CLIBS=-lncurses -llua5.3 
 OUT=tleilax

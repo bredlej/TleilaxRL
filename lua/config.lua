@@ -1,6 +1,6 @@
 local config = {
-	screen_width=64,
-	screen_height=32,
+	screen_width=63,
+	screen_height=31,
 	scroll_speed=0.3,
 	ms_per_update_graphics=16,
 	ms_per_update_logic=1000

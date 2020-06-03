@@ -3,6 +3,16 @@ local C = require 'lua/c_bindings'
 local machine = require 'lua/statemachine'
 local inspect = require "lua/inspect"
 
+function lines_from(file)
+	lines = {}
+	for line in io.lines(file) do
+		lines[#lines + 1] = line
+	end
+	return lines
+end
+
+local lines = lines_from("lua/tleilax_gui.txt")
+
 local config = require 'lua/config'
 require 'lua/star'
 
@@ -116,11 +126,14 @@ function draw_fuel_indicator(fuel_component, x, y)
 end
 
 function draw_galaxy(elapsed_ms)
+	for k,v in pairs(lines) do
+		C.draw_string(v,0,k, 5)
+	end
 	states[ui_state.current]:draw({["elapsed"] = elapsed_ms, ["entities"] = entities})
-	draw_fuel_indicator(entities[0]["fuel"], config.screen_width + 12, 5)
-	C.draw_string("Press one of w s a d to scroll the galaxy.", 0, 40, 0)
-	C.draw_string("Press one of h j k l to control the spaceship.", 0, 41, 0)
-	C.draw_string("Press CTRL+c to exit.", 0, 43, 0)
+	draw_fuel_indicator(entities[0]["fuel"], config.screen_width + 4, 6)
+	C.draw_string("Press one of w s a d to scroll the galaxy.", 0, 43, 0)
+	C.draw_string("Press one of h j k l to control the spaceship.", 0, 44, 0)
+	C.draw_string("Press CTRL+c to exit.", 0, 45, 0)
 end
 
 C.init_color_pair(1, G.color["BLACK"], G.color["BLACK"])

@@ -1,8 +1,9 @@
 #include "ncurses_tools.h"
 #include <ncurses.h>
-
+#include <locale.h>
 uint32_t init_ncurses_config() 
 {
+	setlocale(LC_ALL, "");
 	initscr();
 	cbreak();
 	noecho();

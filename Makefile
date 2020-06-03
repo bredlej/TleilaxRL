@@ -1,6 +1,6 @@
 CC=clang
 CFLAGS=-Wall -I -fsyntax-only -g
-CLIBS=-lncurses -llua5.3 
+CLIBS=-lncursesw -llua5.3 
 OUT=tleilax
 OBJS=tleilax.o random.o pcg_basic.o ncurses_tools.o lua_utils.o
 OBJ_DIR=obj

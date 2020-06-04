@@ -99,8 +99,8 @@ local key_actions = {
 	["o"] = toggle_states
 }
 
-local function key_pressed(key, time_ms)
-	if (key_actions[key]) 
+function key_pressed(key, time_ms)
+	if (key_actions[key])
 	then
 		key_actions[key](time_ms)
 	end
@@ -137,4 +137,3 @@ C.init_color_pair(5, G.color["BLUE"], G.color["BLACK"])
 C.init_color_pair(6, G.color["MAGENTA"], G.color["BLACK"])
 C.init_color_pair(7, G.color["CYAN"], G.color["BLACK"])
 C.init_color_pair(8, G.color["WHITE"], G.color["BLACK"])
-

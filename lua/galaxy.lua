@@ -1,20 +1,14 @@
-local G = require 'lua/galaxy_c_bindings'
+require 'lua/star'
+local G = require 'lua/globals'
 local C = require 'lua/c_bindings'
 local machine = require 'lua/statemachine'
 local inspect = require "lua/inspect"
 
-function lines_from(file)
-	lines = {}
-	for line in io.lines(file) do
-		lines[#lines + 1] = line
-	end
-	return lines
-end
 
-local lines = lines_from("lua/tleilax_gui.txt")
+local gui_layer_0 = G.file_read_lines("lua/states/galaxymap.gui.layer0")
+local gui_layer_1 = G.file_read_lines("lua/states/galaxymap.gui.layer1")
 
 local config = require 'lua/config'
-require 'lua/star'
 
 local ui_state = machine.create({
 	initial = 'galaxy_view',
@@ -91,9 +85,8 @@ local states = {
 }
 
 
-key_actions = {
+local key_actions = {
 	["a"] = states[ui_state.current].input_map["a"],
-
 	["d"] = states[ui_state.current].input_map["d"],
 	["w"] = states[ui_state.current].input_map["w"],
 	["s"] = states[ui_state.current].input_map["s"],
@@ -106,14 +99,14 @@ key_actions = {
 	["o"] = toggle_states
 }
 
-function key_pressed(key, time_ms)
+local function key_pressed(key, time_ms)
 	if (key_actions[key]) 
 	then
 		key_actions[key](time_ms)
 	end
 end
 
-function draw_fuel_indicator(fuel_component, x, y)
+local function draw_fuel_indicator(fuel_component, x, y)
 	C.draw_string(string.format("Fuel [           ]: %d/%d", fuel_component["current"], fuel_component["max"]), x, y, 0)
 	local color
 	for i = 0, math.floor(11 * (fuel_component["current"] / fuel_component["max"])) - 1, 1
@@ -125,15 +118,15 @@ function draw_fuel_indicator(fuel_component, x, y)
 		end
 end
 
+
 function draw_galaxy(elapsed_ms)
-	for k,v in pairs(lines) do
-		C.draw_string(v,0,k, 5)
-	end
+	G.utf8_draw_lines(gui_layer_0, 0, 0, 5)
+	G.utf8_draw_lines(gui_layer_1, 0, 0, 7)
 	states[ui_state.current]:draw({["elapsed"] = elapsed_ms, ["entities"] = entities})
-	draw_fuel_indicator(entities[0]["fuel"], config.screen_width + 4, 6)
-	C.draw_string("Press one of w s a d to scroll the galaxy.", 0, 43, 0)
-	C.draw_string("Press one of h j k l to control the spaceship.", 0, 44, 0)
-	C.draw_string("Press CTRL+c to exit.", 0, 45, 0)
+	draw_fuel_indicator(entities[0]["fuel"], config.screen_width + 7, 6)
+	C.draw_string("Press one of w s a d to scroll the galaxy.", 3, 43, 0)
+	C.draw_string("Press one of h j k l to control the spaceship.", 3, 44, 0)
+	C.draw_string("Press CTRL+c to exit.", 3, 45, 0)
 end
 
 C.init_color_pair(1, G.color["BLACK"], G.color["BLACK"])

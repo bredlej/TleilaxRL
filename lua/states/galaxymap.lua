@@ -1,4 +1,4 @@
-local G = require('lua/galaxy_c_bindings')
+local G = require('lua/globals')
 local C = require('lua/c_bindings')
 local config = require ('lua/config')
 local inspect = require ('lua/inspect')

@@ -54,23 +54,27 @@ local galaxy_state = {
 					end
 		end
 	end	
+		local message_offset_x = 6
+		local message_offset_y = 10
 	if (player_at_star)
 		then
-			C.draw_string(string.format("You found a star system!"), config.screen_width + 4, 10, 0)
+			C.draw_string(string.format("You found a star system!"), config.screen_width + message_offset_x, 10, 0)
 			local i = 0
 			for planet_idx = 0, player_at_star.amount_planets, 1
 				do
 					planets = player_at_star.planets
-					C.draw_string(string.format("Planets"), config.screen_width + 4, 12 , 0)
-					C.draw_string(string.format(" O "), config.screen_width + 4 +(i*3), 13 , type_to_color[planets[i]["type"]])
+					C.draw_string (string.format("%s", player_at_star.name), math.floor(config.screen_width / 2 - 5), 2, 0)
+					C.draw_string(string.format("Planets"), config.screen_width + message_offset_x, 12 , 0)
+					C.draw_string(string.format(" O "), config.screen_width + message_offset_x +(i*3), 13 , type_to_color[planets[i]["type"]])
 					i = i + 1
 				end
 		else
 			for i = 0, 10, 1
 				do
-					C.draw_string(string.format("                     "), config.screen_width + 4, 5 + i, 0)
+					C.draw_string (string.format("                         "), math.floor(config.screen_width / 2 - 5), 2, 0)
+					C.draw_string(string.format("                         "), config.screen_width + message_offset_x, 5 + i, 0)
 				end
-			C.draw_string(string.format("                 "), config.screen_width + 4, 5, 0)
+			C.draw_string(string.format("                 "), config.screen_width + message_offset_x, 5, 0)
 		end
 	end,
 	input_map = {

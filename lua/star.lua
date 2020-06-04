@@ -1,4 +1,5 @@
 local C = require('lua/c_bindings')
+local namegen = require("lua/namegen")
 
 -- Meta class Star
 local function random_type()
@@ -41,6 +42,7 @@ Star = {
 		else
 			self.exists = true
 			self.type = random_type()
+			self.name = namegen.random_name()
 			self.color_idx = type_to_color[self.type]
 			self.amount_planets = C.random_int(1, 9)
 			for i = 0, self.amount_planets, 1

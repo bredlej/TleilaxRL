@@ -36,8 +36,8 @@ local entities = {
 			["y"] = config.screen_height / 2
 		},
 		["fuel"] = {
-			["current"] = 30,
-			["max"] = 30
+			["current"] = 500,
+			["max"] = 500
 		}
 	}
 }

@@ -45,7 +45,19 @@ local globals = {
 			lines[#lines + 1] = line
 		end
 		return lines
-	end
+	end,
+	clear_window = {
+		["status"] = function()
+		 for y = 35, 45, 1 do
+			 C.draw_string("                                                                ", 1, y, 0)
+		 end
+		end,
+		["attributes"] = function()
+		 for y = 2, 45, 1 do
+			 C.draw_string("                                                     ", 66, y, 0)
+		 end
+		end
+	}
 }
 
 return globals

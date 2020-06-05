@@ -3,10 +3,10 @@ local C = require('lua/c_bindings')
 local config = require ('lua/config')
 local inspect = require ('lua/inspect')
 local handle_events = {
-		["scroll_left"] = function(time_ms) G.galaxy["offset_x"] = G.galaxy["offset_x"] - config.scroll_speed * time_ms end,
-		["scroll_right"] = function(time_ms) G.galaxy["offset_x"] = G.galaxy["offset_x"] + config.scroll_speed * time_ms end,
-		["scroll_up"] = function(time_ms) G.galaxy["offset_y"] = G.galaxy["offset_y"] - config.scroll_speed * time_ms end,
-		["scroll_down"] = function(time_ms) G.galaxy["offset_y"] = G.galaxy["offset_y"] + config.scroll_speed * time_ms end,
+--		["scroll_left"] = function(time_ms) G.galaxy["offset_x"] = G.galaxy["offset_x"] - config.scroll_speed * time_ms end,
+--		["scroll_right"] = function(time_ms) G.galaxy["offset_x"] = G.galaxy["offset_x"] + config.scroll_speed * time_ms end,
+--		["scroll_up"] = function(time_ms) G.galaxy["offset_y"] = G.galaxy["offset_y"] - config.scroll_speed * time_ms end,
+--		["scroll_down"] = function(time_ms) G.galaxy["offset_y"] = G.galaxy["offset_y"] + config.scroll_speed * time_ms end,
 	}
 local type_to_color = {
 	[1] = 6,
@@ -14,14 +14,24 @@ local type_to_color = {
 	[3] = 5
 }
 local offset = {
-	["x"] = 2,
-	["y"] = 5
+	["x"] = 1,
+	["y"] = 2
 }
+local function draw_fuel_indicator(fuel_component, x, y)
+	C.draw_string(string.format("Fuel [           ]: %d/%d", fuel_component["current"], fuel_component["max"]), x, y, 0)
+	local color
+	for i = 0, math.floor(11 * (fuel_component["current"] / fuel_component["max"])) - 1, 1
+		do
+			if (i < 4) then color = 6
+			elseif (i >= 4)  and (i < 8) then color = 5
+			else color = 7 end
+			C.draw_string("#", x+6+i, y, color)
+		end
+end
 local galaxy_state = {
 	draw = function (self, args)
 	local elapsed_ms = args["elapsed"]
 	local entities = args["entities"]
-		C.draw_string(elapsed_ms, 100, 100, 1)
 
 	G.player_pos = entities[0]["position"]
 	local player_at_star = nil
@@ -63,7 +73,7 @@ local galaxy_state = {
 			for planet_idx = 0, player_at_star.amount_planets, 1
 				do
 					planets = player_at_star.planets
-					C.draw_string (string.format("%s", player_at_star.name), math.floor(config.screen_width / 2 - 5), 2, 0)
+					C.draw_string (string.format("- %s -", player_at_star.name), math.floor(config.screen_width / 2 - 5), 2, 0)
 					C.draw_string(string.format("Planets"), config.screen_width + message_offset_x, 12 , 0)
 					C.draw_string(string.format(" O "), config.screen_width + message_offset_x +(i*3), 13 , type_to_color[planets[i]["type"]])
 					i = i + 1
@@ -75,6 +85,10 @@ local galaxy_state = {
 					C.draw_string(string.format("                         "), config.screen_width + message_offset_x, 5 + i, 0)
 				end
 			C.draw_string(string.format("                 "), config.screen_width + message_offset_x, 5, 0)
+	draw_fuel_indicator(entities[0]["fuel"], config.screen_width + 7, 6)
+	C.draw_string("Press one of w s a d to scroll the galaxy.", 3, 43, 0)
+	C.draw_string("Press one of h j k l to control the spaceship.", 3, 44, 0)
+	C.draw_string("Press CTRL+c to exit.", 3, 45, 0)
 		end
 	end,
 	input_map = {

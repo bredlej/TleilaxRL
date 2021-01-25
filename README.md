@@ -2,6 +2,8 @@
 
 A roguelike in space!
 
+![Screenshot](https://bredlej.github.io//TleilaxRL_modern//assets/tleilaxrl.gif)
+
 ## Prerequisites
 
 Needs a linux system or something with a bash console & support for Ncurses and Lua.
